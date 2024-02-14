@@ -8,10 +8,15 @@ const { title } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta http-equiv="X-UA-Compatible" content="IE=7" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="keywords" content="" />
+    <meta name="description" content="Gusase personal projec" />
     <title>{title} | {import.meta.env.APP_NAME}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link
       rel="preload"
       href="/fonts/Mona-Sans.woff2"
@@ -23,12 +28,14 @@ const { title } = Astro.props;
   </head>
 
   <body
-    class="font-base75 antialiased text-gray-600 min-h-full flex flex-col [overflow-anchor:none]"
+    class="font-base100 antialiased text-gray-600 min-h-full flex flex-col [overflow-anchor:none]"
   >
     <MainNavigation />
 
-    <slot />
-
+    <div class="bg-white py-16 sm:py-32">
+      <slot />
+    </div>
+    
     <MainFooter />
   </body>
 </html>

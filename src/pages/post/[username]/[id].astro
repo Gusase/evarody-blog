@@ -1,0 +1,9 @@
+---
+import MainLayout from "../../../layouts/MainLayout.astro";
+
+const { username, id } = Astro.params;
+---
+
+<MainLayout>
+  <h1>{username}: {id}</h1>
+</MainLayout>

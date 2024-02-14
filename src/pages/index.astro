@@ -16,9 +16,7 @@ query getDiscussios($repoName: String!, $repoOwner: String!){
     nameWithOwner,
     createdAt,
     url,
-    visibility,
-    hasDiscussionsEnabled,
-    discussions(first:100) {
+    discussions(first:27,orderBy:{field: CREATED_AT, direction: DESC}) {
         pageInfo{
             endCursor,
             hasNextPage,
@@ -28,8 +26,19 @@ query getDiscussios($repoName: String!, $repoOwner: String!){
         edges{
             cursor
             node{
+                databaseId,
+                author{
+                    login,
+                    avatarUrl,
+                    url,
+                },
                 title,
+                body,
                 bodyText,
+                bodyHTML,
+                category{
+                  name
+                },
                 createdAt,
             },
         },
@@ -59,7 +68,7 @@ query getDiscussios($repoName: String!, $repoOwner: String!){
 
 const variables = {
   repoName: "unrelease-blog",
-  repoOwner: "GalaxyVallen",
+  repoOwner: "galaxyvallen",
 };
 
 const response = await fetch(import.meta.env.PUBLIC_GITAPI, {
@@ -76,59 +85,332 @@ const response = await fetch(import.meta.env.PUBLIC_GITAPI, {
 
 const json = await response.json();
 const { data } = json;
-console.log(
-  "🚀 ~ file: index.astro:76 ~ data:",
-  data.repository.discussions.edges
-);
 ---
 
 <MainLayout title="Home">
-  <div class="bg-white py-16 sm:py-32">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl lg:mx-0">
-        <h2 class="text-3xl font-semibold font-base75 text-gray-900 sm:text-4xl">
-          {import.meta.env.APP_NAME}
-        </h2>
-        <p class="mt-2 text-lg leading-8 text-gray-600">
-          Src: <a
-            href={data?.repository.url}
-            class="relative isolate no-underline after:absolute after:right-[.05em] after:bottom-0 after:left-[.05em] after:block after:-z-[1] after:h-px after:bg-gray-400 after:transition-transform after:scale-x-100 after:origin-bottom-left hover:after:scale-x-0 hover:after:origin-bottom-right before:absolute before:inset-0 before:-z-[1] before:block before:bg-gray-300/75 before:transition-transform before:scale-x-0 before:origin-bottom-right hover:before:scale-x-100 hover:before:origin-bottom-left hover:text-black duration-150 font-mono"
-            >{data?.repository.nameWithOwner}</a
-          >
-        </p>
-      </div>
-
-      <div
-        class="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-5 gap-y-8 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-3"
+  <div class="mx-auto max-w-[2024px] px-6 lg:px-8">
+    <div class="mx-auto max-w-4xl text-center">
+      <p
+        class="rounded-full bg-gray-900 inline-block px-3.5 py-1 text-xs font-medium text-white shadow-sm sm:hidden"
       >
-        {
-          data.repository.discussions.edges?.map(
-            (data: {
-              node: { createdAt: string; title: string; bodyText: string };
-            }) => (
-              <a href="" class="h-full w-full border-b border-gray-300 hover:bg-gray-100/30 rounded-sm hover:scale-[0.99] hover:border-gray-500 duration-150">
-                <article class="flex max-w-xl h-full flex-col items-start justify-start p-3">
-                  <div class="flex items-center gap-x-4 text-xs">
-                    <p class="text-gray-500">
-                      {formatDate(data.node.createdAt)}
-                    </p>
-                  </div>
-                  <div class="group relative">
-                    <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
-                      {data.node.title}
-                    </h3>
-                    <p class="mt-3 md:mt-3.5 line-clamp-3 text-sm leading-6 text-gray-600">
-                      {data.node.bodyText}
-                    </p>
-                  </div>
-                </article>
-              </a>
-            )
-          )
-        }
+        Under Development
+      </p>
+      <h2
+        class="text-3xl font-medium font-base125 text-gray-900 sm:text-4xl 2xl:text-5xl mt-4 sm:mt-0"
+      >
+        Evarody Blog
+      </h2>
+      <p class="mt-3 sm:mt-5 text-base sm:text-lg leading-8 text-gray-600">
+        {data?.repository.description}
+      </p>
+      <p class="mt-2.5 text-base sm:text-lg leading-8 text-gray-600">
+        <a
+          href={data?.repository.url}
+          class="relative isolate no-underline after:absolute after:right-[.05em] after:bottom-0 after:left-[.05em] after:block after:-z-[1] after:h-px after:bg-gray-400/40 after:transition-transform after:scale-x-100 after:origin-bottom-left hover:after:scale-x-0 hover:after:origin-bottom-right before:absolute before:inset-0 before:-z-[1] before:block before:bg-gray-200/75 before:transition-transform before:scale-x-0 before:origin-bottom-right hover:before:scale-x-100 hover:before:origin-bottom-left hover:text-black duration-150 font-mono"
+          >{data?.repository.nameWithOwner}</a
+        >
+      </p>
 
-        <!-- More posts... -->
+      <div class="hidden">
+        <div class="relative inline-block text-left">
+          <div>
+            <button
+              type="button"
+              class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              id="menu-button"
+              aria-expanded="true"
+              aria-haspopup="true"
+            >
+              Options
+              <svg
+                class="-mr-1 h-5 w-5 text-gray-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                  clip-rule="evenodd"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!--
+            Dropdown menu, show/hide based on menu state.
+        
+            Entering: "transition ease-out duration-100"
+              From: "transform opacity-0 scale-95"
+              To: "transform opacity-100 scale-100"
+            Leaving: "transition ease-in duration-75"
+              From: "transform opacity-100 scale-100"
+              To: "transform opacity-0 scale-95"
+          -->
+          <div
+            class="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="menu-button"
+            tabindex="-1"
+          >
+            <div class="py-1" role="none">
+              <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+              <a
+                href="#"
+                class="text-gray-700 block px-4 py-2 text-sm"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-0">Edit</a
+              >
+              <a
+                href="#"
+                class="text-gray-700 block px-4 py-2 text-sm"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-1">Duplicate</a
+              >
+            </div>
+            <div class="py-1" role="none">
+              <a
+                href="#"
+                class="text-gray-700 block px-4 py-2 text-sm"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-2">Archive</a
+              >
+              <a
+                href="#"
+                class="text-gray-700 block px-4 py-2 text-sm"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-3">Move</a
+              >
+            </div>
+            <div class="py-1" role="none">
+              <a
+                href="#"
+                class="text-gray-700 block px-4 py-2 text-sm"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-4">Share</a
+              >
+              <a
+                href="#"
+                class="text-gray-700 block px-4 py-2 text-sm"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-5">Add to favorites</a
+              >
+            </div>
+            <div class="py-1" role="none">
+              <a
+                href="#"
+                class="text-gray-700 block px-4 py-2 text-sm"
+                role="menuitem"
+                tabindex="-1"
+                id="menu-item-6">Delete</a
+              >
+            </div>
+          </div>
+        </div>
       </div>
+
+    </div>
+
+    <div class="hidden">
+      <div class="relative z-10" role="dialog" aria-modal="true">
+        <!--
+          Background backdrop, show/hide based on modal state.
+
+          Entering: "ease-out duration-300"
+            From: "opacity-0"
+            To: "opacity-100"
+          Leaving: "ease-in duration-200"
+            From: "opacity-100"
+            To: "opacity-0"
+        -->
+        <div
+          class="fixed inset-0 hidden bg-gray-500 bg-opacity-75 transition-opacity md:block"
+        >
+        </div>
+
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+          <div
+            class="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4"
+          >
+            <!--
+        Modal panel, show/hide based on modal state.
+
+        Entering: "ease-out duration-300"
+          From: "opacity-0 translate-y-4 md:translate-y-0 md:scale-95"
+          To: "opacity-100 translate-y-0 md:scale-100"
+        Leaving: "ease-in duration-200"
+          From: "opacity-100 translate-y-0 md:scale-100"
+          To: "opacity-0 translate-y-4 md:translate-y-0 md:scale-95"
+      -->
+            <div
+              class="flex w-full transform text-left text-base transition md:my-8 md:max-w-2xl md:px-4 lg:max-w-4xl"
+            >
+              <div
+                class="relative flex w-full items-center overflow-hidden bg-white px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8"
+              >
+                <button
+                  type="button"
+                  class="absolute right-4 top-4 text-gray-400 hover:text-gray-500 sm:right-6 sm:top-8 md:right-6 md:top-6 lg:right-8 lg:top-8"
+                >
+                  <span class="sr-only">Close</span>
+                  <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+
+                <div class="w-full">
+                  <div class="">
+                    <h2 class="text-2xl font-bold text-gray-900 sm:pr-12">
+                      Basic Tee 6-Pack
+                    </h2>
+
+                    <section aria-labelledby="information-heading" class="mt-2">
+                      <h3 id="information-heading" class="sr-only">
+                        Product information
+                      </h3>
+
+                      <p class="text-2xl text-gray-900">$192</p>
+
+                      <!-- Reviews -->
+                      <div class="mt-6">
+                        <h4 class="sr-only">Reviews</h4>
+                        <div class="flex items-center">
+                          <div class="flex items-center">
+                            <!-- Active: "text-gray-900", Default: "text-gray-200" -->
+                            <svg
+                              class="text-gray-900 h-5 w-5 flex-shrink-0"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
+                                clip-rule="evenodd"></path>
+                            </svg>
+                            <svg
+                              class="text-gray-900 h-5 w-5 flex-shrink-0"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
+                                clip-rule="evenodd"></path>
+                            </svg>
+                            <svg
+                              class="text-gray-900 h-5 w-5 flex-shrink-0"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
+                                clip-rule="evenodd"></path>
+                            </svg>
+                            <svg
+                              class="text-gray-900 h-5 w-5 flex-shrink-0"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
+                                clip-rule="evenodd"></path>
+                            </svg>
+                            <svg
+                              class="text-gray-200 h-5 w-5 flex-shrink-0"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
+                                clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                          <p class="sr-only">3.9 out of 5 stars</p>
+                          <a
+                            href="#"
+                            class="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                            >117 reviews</a
+                          >
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-5 md:grid-cols-2 gap-y-8 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none xl:grid-cols-4"
+    >
+      {
+        data.repository.discussions.edges?.map((data) => (
+          <a href={`post/${data.node.author.login}/${data.node.databaseId}`}>
+            <article class="h-full w-full border-b max-w-xl group hover:bg-white rounded-sm hover:scale-[0.99] relative isolate no-underline after:absolute after:right-[.05em] after:bottom-0 after:left-[.05em] after:block after:-z-[1] after:h-px after:bg-gray-400/40 after:transition-transform after:scale-x-100 after:origin-bottom-left hover:after:scale-x-0 hover:after:origin-bottom-right before:absolute before:inset-0 before:-z-[1] before:block before:bg-gray-200/75 before:transition-transform before:scale-x-0 before:origin-bottom-right hover:before:scale-x-100 hover:before:origin-bottom-left hover:text-black duration-150">
+              <div class="flex h-full flex-col items-start justify-start p-3 gap-y-3.5">
+                <div class="flex items-center gap-x-4 text-xs/5">
+                  <p class="text-gray-500">{formatDate(data.node.createdAt)}</p>
+                  <span class="inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 font-medium text-xs/5 forced-colors:outline bg-zinc-600/10 text-zinc-700">
+                    {data.node.category.name}
+                  </span>
+                </div>
+                <div class="relative">
+                  <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 ">
+                    {data.node.title}
+                  </h3>
+                  <p
+                    class="mt-3 md:mt-3.5 line-clamp-3 text-sm leading-6 text-gray-600"
+                    style="  word-break: break-word"
+                  >
+                    {data.node.bodyText}
+                  </p>
+                </div>
+                <div class="relative mt-auto flex items-center gap-x-2">
+                  <img
+                    src={data.node.author.avatarUrl}
+                    alt=""
+                    class="h-8 w-8 rounded-full bg-gray-50"
+                  />
+                  <div class="text-sm leading-6">
+                    <p class="font-semibold text-gray-900">
+                      {data.node.author.login}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </a>
+        ))
+      }
+
+      <!-- More posts... -->
     </div>
   </div>
 </MainLayout>
