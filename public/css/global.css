@@ -1,0 +1,23 @@
+@font-face {
+  font-family: 'Mona Sans';
+  src:
+    url('./Mona-Sans.woff2') format('woff2 supports variations'),
+    url('./Mona-Sans.woff2') format('woff2-variations');
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+}
+
+
+html {
+  font-family: 'Mona Sans';
+}
+
+[x-cloak] { display: none !important; }
+
+.hover-btn-primary {
+  @apply text-white duration-150 hover:bg-red-500 hover:drop-shadow-xl bg-red-600;
+}
+
+.hover-btn-secondary {
+  @apply border-2 border-gray-900/50 bg-transparent text-black duration-150 hover:border-gray-900 hover:bg-gray-100/55;
+}
