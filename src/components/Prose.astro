@@ -3,10 +3,28 @@
 ---
 
 <div
-  class="prose dark:prose-invert
-  prose-h1:font-bold prose-h1:text-xl
-  prose-a:text-blue-600 prose-p:text-justify prose-img:rounded-xl
-  prose-headings:underline"
+  class="prose prose-slate max-w-none dark:prose-invert mt-4
+  prose-headings:scroll-m-20 prose-headings:first:!mt-0 prose-headings:tracking-tight
+  prose-h1:text-3xl prose-headings:mb-4 prose-headings:mt-6 prose-headings:font-semibold lg:prose-h1:text-4xl
+  prose-h1:border-b prose-h1:pb-1.5
+  prose-h2:border-b prose-h2:pb-1.5 prose-h2:text-3xl
+  prose-h3:text-xl
+  prose-h4:text-lg
+  prose-h5:text-base
+  prose-h6:text-sm
+  prose-h6:opacity-90
+  prose-p:leading-7 prose-p:[&:not(:first-child)]:mt-6
+  prose-blockquote:mt-6 prose-blockquote:border-l-4 prose-blockquote:pl-4 prose-blockquote:not-italic prose-blockquote:border-gray-300 prose-blockquote:font-normal prose-blockquote:text-gray-600
+  prose-ul:list-disc prose-ol:list-decimal
+  prose-ul:my-6 prose-ul:ml-6 prose-ul:[&>li]:mt-2
+  prose-ol:my-6 prose-ol:ml-6 prose-ol:[&>li]:mt-2
+  prose-pre:rounded prose-pre:border
+  prose-lead:text-xl prose-lead:text-muted-foreground prose-pre:bg-[#f6f8fa] prose-pre:text-black prose-pre:border-gray-300/90
+prose-inline-code:bg-[#eff1f3] prose-inline-code:after:content-none prose-inline-code:before:content-none prose-inline-code:text-black
+  prose-inline-code:break-words prose-inline-code:relative prose-inline-code:rounded prose-inline-code:px-[0.4em] prose-inline-code:py-[0.2em] prose-inline-code:font-mono prose-inline-code:text-sm prose-inline-code:font-normal
+  prose-a:underline prose-a:hover:no-underline prose-a:break-words prose-p:whitespace-break-spaces
+  prose-img:rounded prose-img:border prose-img:border-gray-400 prose-img:my-6 prose-img:max-w-full prose-img:min-w-0"
+  data-mdx-content="true"
 >
   <slot />
 </div>
