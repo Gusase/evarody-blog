@@ -1,90 +1,12 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
 import { formatDate, generateSlug } from "../helpers/date";
+import { getDiscussions } from "@libs/github";
+import type { Session } from "@auth/core/types";
+import { Auth, SignIn } from "auth-astro/components";
+import Login from "@components/Login.astro";
 
-const query = `
-query getDiscussios($repoName: String!, $repoOwner: String!){
-  repository(owner:$repoOwner, name: $repoName) {
-    id,
-    owner{
-        avatarUrl,
-        login,
-        url
-    },
-    name,
-    description,
-    nameWithOwner,
-    createdAt,
-    url,
-    discussions(first:27,orderBy:{field: CREATED_AT, direction: DESC}) {
-        pageInfo{
-            endCursor,
-            hasNextPage,
-            hasPreviousPage,
-            startCursor
-        },
-        edges{
-            cursor
-            node{
-                number,
-                author{
-                    login,
-                    avatarUrl,
-                    url,
-                },
-                title,
-                body,
-                bodyText,
-                bodyHTML,
-                category{
-                  name
-                },
-                createdAt,
-            },
-        },
-        nodes {
-        # type: Discussion
-        id
-      },
-        totalCount,
-    },
-    discussionCategories(first:2){
-        edges{
-            node{
-                id,
-                name,
-            },
-        },
-    },
-    languages(first:1){
-        nodes{
-            name
-        }
-    },
-    openGraphImageUrl
-  }
-}
-`;
-
-const variables = {
-  repoName: import.meta.env.PUBLIC_REPO_NAME,
-  repoOwner: import.meta.env.PUBLIC_REPO_OWNER,
-};
-
-const response = await fetch(import.meta.env.PUBLIC_GITAPI, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${import.meta.env.AUTH_TOKEN}`,
-  },
-  body: JSON.stringify({
-    query: query,
-    variables: variables,
-  }),
-});
-
-const json = await response.json();
-const { data } = json;
+const data = await getDiscussions();
 ---
 
 <MainLayout title="Home">
@@ -101,13 +23,13 @@ const { data } = json;
         Evarody Blog
       </h2>
       <p class="mt-3 sm:mt-5 text-base sm:text-lg leading-8 text-gray-600">
-        {data?.repository.description}
+        {data?.description}
       </p>
       <p class="mt-2.5 text-base sm:text-lg leading-8 text-gray-600">
         <a
-          href={data?.repository.url}
+          href={data?.url}
           class="relative isolate no-underline after:absolute after:right-[.05em] after:bottom-0 after:left-[.05em] after:block after:-z-[1] after:h-px after:bg-gray-400/40 after:transition-transform after:scale-x-100 after:origin-bottom-left hover:after:scale-x-0 hover:after:origin-bottom-right before:absolute before:inset-0 before:-z-[1] before:block before:bg-gray-200/75 before:transition-transform before:scale-x-0 before:origin-bottom-right hover:before:scale-x-100 hover:before:origin-bottom-left hover:text-black duration-150 font-mono"
-          >{data?.repository.nameWithOwner}</a
+          >{data?.nameWithOwner}</a
         >
       </p>
 
@@ -216,161 +138,25 @@ const { data } = json;
       </div>
     </div>
 
-    <div class="hidden">
-      <div class="relative z-10" role="dialog" aria-modal="true">
-        <!--
-          Background backdrop, show/hide based on modal state.
-
-          Entering: "ease-out duration-300"
-            From: "opacity-0"
-            To: "opacity-100"
-          Leaving: "ease-in duration-200"
-            From: "opacity-100"
-            To: "opacity-0"
-        -->
-        <div
-          class="fixed inset-0 hidden bg-gray-500 bg-opacity-75 transition-opacity md:block"
-        >
-        </div>
-
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-          <div
-            class="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4"
-          >
-            <!--
-        Modal panel, show/hide based on modal state.
-
-        Entering: "ease-out duration-300"
-          From: "opacity-0 translate-y-4 md:translate-y-0 md:scale-95"
-          To: "opacity-100 translate-y-0 md:scale-100"
-        Leaving: "ease-in duration-200"
-          From: "opacity-100 translate-y-0 md:scale-100"
-          To: "opacity-0 translate-y-4 md:translate-y-0 md:scale-95"
-      -->
-            <div
-              class="flex w-full transform text-left text-base transition md:my-8 md:max-w-2xl md:px-4 lg:max-w-4xl"
-            >
-              <div
-                class="relative flex w-full items-center overflow-hidden bg-white px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8"
-              >
-                <button
-                  type="button"
-                  class="absolute right-4 top-4 text-gray-400 hover:text-gray-500 sm:right-6 sm:top-8 md:right-6 md:top-6 lg:right-8 lg:top-8"
-                >
-                  <span class="sr-only">Close</span>
-                  <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                </button>
-
-                <div class="w-full">
-                  <div class="">
-                    <h2 class="text-2xl font-bold text-gray-900 sm:pr-12">
-                      Basic Tee 6-Pack
-                    </h2>
-
-                    <section aria-labelledby="information-heading" class="mt-2">
-                      <h3 id="information-heading" class="sr-only">
-                        Product information
-                      </h3>
-
-                      <p class="text-2xl text-gray-900">$192</p>
-
-                      <!-- Reviews -->
-                      <div class="mt-6">
-                        <h4 class="sr-only">Reviews</h4>
-                        <div class="flex items-center">
-                          <div class="flex items-center">
-                            <!-- Active: "text-gray-900", Default: "text-gray-200" -->
-                            <svg
-                              class="text-gray-900 h-5 w-5 flex-shrink-0"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              aria-hidden="true"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
-                                clip-rule="evenodd"></path>
-                            </svg>
-                            <svg
-                              class="text-gray-900 h-5 w-5 flex-shrink-0"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              aria-hidden="true"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
-                                clip-rule="evenodd"></path>
-                            </svg>
-                            <svg
-                              class="text-gray-900 h-5 w-5 flex-shrink-0"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              aria-hidden="true"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
-                                clip-rule="evenodd"></path>
-                            </svg>
-                            <svg
-                              class="text-gray-900 h-5 w-5 flex-shrink-0"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              aria-hidden="true"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
-                                clip-rule="evenodd"></path>
-                            </svg>
-                            <svg
-                              class="text-gray-200 h-5 w-5 flex-shrink-0"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              aria-hidden="true"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z"
-                                clip-rule="evenodd"></path>
-                            </svg>
-                          </div>
-                          <p class="sr-only">3.9 out of 5 stars</p>
-                          <a
-                            href="#"
-                            class="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                            >117 reviews</a
-                          >
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="my-3 sm:hidden">
+      <Auth>
+        {
+          (session: Session) => {
+            if (session) {
+              return <Login user={session.user} />;
+            } else {
+              return <SignIn provider="github">Sign In</SignIn>;
+            }
+          }
+        }
+      </Auth>
     </div>
 
     <div
       class="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-5 md:grid-cols-2 gap-y-8 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none xl:grid-cols-4"
     >
       {
-        data.repository.discussions.edges?.map((data) => (
+        data.discussions.edges?.map((data) => (
           <a
             href={`post/${data.node.author.login}/${generateSlug(data.node.title)}----${data.node.number}`}
           >
@@ -410,8 +196,6 @@ const { data } = json;
           </a>
         ))
       }
-
-      <!-- More posts... -->
     </div>
   </div>
 </MainLayout>

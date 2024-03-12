@@ -1,5 +1,7 @@
 ---
-
+import type { Session } from "@auth/core/types";
+import { Auth, SignIn } from "auth-astro/components";
+import Login from "@components/Login.astro";
 ---
 
 <nav
@@ -59,15 +61,28 @@
             </button>
           </li>
         </ul>
-        <p
-          class="rounded-full ml-auto bg-gray-900 inline-block px-3.5 py-1 text-sm font-medium text-white shadow-sm"
-        >
-          Under Development
-        </p>
+        <div class="ml-auto flex space-x-3 items-center">
+          <p
+            class="rounded-full bg-gray-900 inline-block px-3.5 py-1 text-sm font-medium text-white shadow-sm"
+          >
+            Under Development
+          </p>
+          <Auth>
+            {
+              (session: Session) => {
+                if (session) {
+                  return <Login user={session.user} />;
+                } else {
+                  return <SignIn provider="github">Sign In</SignIn>;
+                }
+              }
+            }
+          </Auth>
+        </div>
       </div>
 
-      <div class="absolute inset-y-0 right-0 flex items-center sm:hidden">
-        <!-- Mobile menu button-->
+      <!-- Mobile menu button-->
+      <!-- <div class="absolute inset-y-0 right-0 flex items-center sm:hidden">
         <button
           type="button"
           class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white duration-150"
@@ -107,7 +122,7 @@
               d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
-      </div>
+      </div> -->
     </div>
   </div>
 
